@@ -14,35 +14,35 @@ function DataCleaner(data, schema) {
 
             if (value === null || value === undefined || value === "") continue;
 
-            // ✅ number (strict)
+            // number (strict)
             if (type === "number") {
                 if (typeof value === "number") {
                     values.push(value);
                 }
             }
 
-            // ✅ percentage (already decimal)
+            // percentage (already decimal)
             else if (type === "percentage") {
                 if (typeof value === "number") {
                     values.push(value);
                 }
             }
 
-            // ✅ boolean normalize
+            // boolean normalize
             else if (type === "boolean") {
                 if (value === true || value === false) {
                     values.push(value);
                 }
             }
 
-            // ✅ email
+            // email
             else if (type === "email") {
                 if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                     values.push(value);
                 }
             }
 
-            // ✅ date
+            // date
             else if (type === "date") {
                 if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
                     values.push(value);
@@ -105,7 +105,7 @@ function DataCleaner(data, schema) {
             let value = data[i][key];
             let type = schema[key];
 
-            // ✅ number
+            // number
             if (type === "number") {
 
                 if (typeof value !== "number") {
@@ -115,7 +115,7 @@ function DataCleaner(data, schema) {
                 }
             }
 
-            // ✅ percentage (already decimal)
+            // percentage (already decimal)
             else if (type === "percentage") {
 
                 if (typeof value !== "number") {
@@ -125,7 +125,7 @@ function DataCleaner(data, schema) {
                 }
             }
 
-            // ✅ boolean
+            // boolean
             else if (type === "boolean") {
 
                 if (value === true || value === false) {
@@ -135,7 +135,7 @@ function DataCleaner(data, schema) {
                 }
             }
 
-            // ✅ email
+            // email
             else if (type === "email") {
 
                 if (value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -145,7 +145,7 @@ function DataCleaner(data, schema) {
                 }
             }
 
-            // ✅ date
+            // date
             else if (type === "date") {
 
                 if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -155,7 +155,7 @@ function DataCleaner(data, schema) {
                 }
             }
 
-            // ✅ string
+            // string
             else {
 
                 if (value === null || value === "") {

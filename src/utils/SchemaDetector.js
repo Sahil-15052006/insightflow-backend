@@ -1,100 +1,97 @@
-function SchemaDetector(data) {
+const {isBoolean} = require("./helpers/isBoolean");
+const {isEmail} = require("./helpers/isEmail");
+const {isPercentage} = require("./helpers/isPercentage");
+const {isNumber} = require("./helpers/isNumber");
+const {isDate} = require("./helpers/isDate");
+const getUniqueValues = require("./helpers/getUniqueValues");
 
-    const dataSchema = {}
+function SchemaDetector(data) {
+    const dataSchema = {};
 
     if (!data || data.length === 0) {
-        return dataSchema
+        return dataSchema;
     }
 
-    const sampleSize = Math.min(50, data.length)
-    const sampleData = data.slice(0, sampleSize)
+    const sampleSize = Math.min(50, data.length);
+    const sampleData = data.slice(0, sampleSize);
 
-    const columns = Object.keys(sampleData[0])
+    const columns = Object.keys(sampleData[0]);
 
-    for (let i = 0; i < columns.length; i++) {
+    for (const columnName of columns) {
+        let stringCount = 0;
+        let numberCount = 0;
+        let booleanCount = 0;
+        let emailCount = 0;
+        let dateCount = 0;
+        let percentageCount = 0;
+        let totalValid = 0;
 
-        const columnName = columns[i]
+        const uniqueValues = getUniqueValues(
+            sampleData,
+            columnName
+        );
 
-        let stringCount = 0
-        let numberCount = 0
-        let booleanCount = 0
-        let emailCount = 0
-        let dateCount = 0
-        let percentageCount = 0
-        let totalValid = 0
+        for (let i = 0; i < sampleData.length; i++) {
+            let value = sampleData[i][columnName];
 
-        for (let j = 0; j < sampleData.length; j++) {
-
-            let value = sampleData[j][columnName]
-
-            if (value === null || value === undefined || value === "") {
-                continue
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                continue;
             }
 
-            totalValid++
+            totalValid++;
 
-            value = String(value).trim().toLowerCase()
+            value = String(value)
+                .trim()
+                .toLowerCase();
 
-            // ✅ boolean
-            if (value === "true" || value === "false") {
-                booleanCount++
-            }
-
-            // ✅ email
-            else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                emailCount++
-            }
-
-            // ✅ percentage (check BEFORE number)
-            else if (/^\d+(\.\d+)?%$/.test(value)) {
-                percentageCount++
-            }
-
-            // ✅ strict number
-            else if (/^-?\d+(\.\d+)?$/.test(value)) {
-                numberCount++
-            }
-
-            // ✅ strict date only
-            else {
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                    dateCount++;
+            if (isBoolean(value)) {
+                booleanCount++;
+            } else if (isEmail(value)) {
+                emailCount++;
+            } else if (isPercentage(value)) {
+                percentageCount++;
+            } else if (isNumber(value)) {
+                numberCount++;
+            } else if (isDate(value)) {
+                dateCount++;
             } else {
-                    stringCount++;
+                stringCount++;
             }
-}
         }
 
-        let detectedType = "string"
+        let detectedType = "string";
 
-        // ✅ avoid divide by zero
         if (totalValid === 0) {
-            dataSchema[columnName] = "string"
-            continue
+            dataSchema[columnName] = {
+                type: "string",
+                uniqueCount: uniqueValues.length,
+            };
+            continue;
         }
 
-        // ✅ proper priority
         if (percentageCount / totalValid > 0.5) {
-            detectedType = "percentage"
-        }
-        else if (numberCount / totalValid > 0.3) {
-            detectedType = "number"
-        }
-        else if (booleanCount / totalValid > 0.8) {
-            detectedType = "boolean"
-        }
-        else if (emailCount / totalValid > 0.5) {
-            detectedType = "email"
-        }
-        else if (dateCount / totalValid > 0.5) {
-            detectedType = "date"
+            detectedType = "percentage";
+        } else if (numberCount / totalValid > 0.3) {
+            detectedType = "number";
+        } else if (booleanCount / totalValid > 0.8) {
+            detectedType = "boolean";
+        } else if (emailCount / totalValid > 0.5) {
+            detectedType = "email";
+        } else if (dateCount / totalValid > 0.5) {
+            detectedType = "date";
         }
 
-        dataSchema[columnName] = detectedType
+        dataSchema[columnName] = {
+            type: detectedType,
+            uniqueCount: uniqueValues.length,
+        };
     }
 
-    return dataSchema
+    return dataSchema;
 }
 
 module.exports = SchemaDetector;
